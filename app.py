@@ -2,11 +2,12 @@ from flask import Flask, jsonify
 from db import db
 from blocklist import BLOCKED
 import models
-
+import secrets
 from flask_smorest import Api
 from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
-from flask_migrate import Migrate, migrate
+from flask_migrate import Migrate
+from dotenv import load_dotenv
 import os
 
 from resources.store import blp as StoreBlueprint
@@ -18,7 +19,7 @@ from resources.user import blp as UserBlueprint
 
 def create_app(db_url = None):
     app = Flask(__name__)
-
+    load_dotenv()
     app.config["PROPAGATE_EXCEPTIONS"] = True
     app.config["API_TITLE"] = "Stores API"
     app.config["API_VERSION"] = "0.1"
@@ -31,8 +32,8 @@ def create_app(db_url = None):
     db.init_app(app)
 
     api = Api(app)
-    # secrets.SystemRandom().getrandbits(128)
-    app.config["JWT_SECRET_KEY"] = "57176365437341060766721703687954854170"
+    # secrets.SystemRandom().getrandbits(256)
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_KEY")
     jwt = JWTManager(app)
     migrate = Migrate(app, db)
     @jwt.token_in_blocklist_loader
